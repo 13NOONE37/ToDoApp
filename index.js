@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const bodyParser = require('body-parser');
 const config = require('./config'); // mozna tez z destrukturyzacją: const {port} = require('./config);
 
 require('./db/mongoose');
@@ -7,8 +8,12 @@ require('./db/mongoose');
 //router
 const apiRouter = require('./routes/api');
 
+//parser
+// Content-type: application/json
+app.use(bodyParser.json());
 
-app.use('/', apiRouter);
+
+app.use('/api', apiRouter);
 
 
 //server
