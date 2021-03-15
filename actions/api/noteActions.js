@@ -1,41 +1,61 @@
 const Note = require('../../db/models/note');
 
-module.exports = {
-        saveNote: (req, res)=>{
-            // const newNote = new Note({
-            //         title: "Kup mleko",
-            //         body: "4.78%"
-            // });
-            
-            // const saveTheNote = async (data) =>{
-            //         try{
-            //         const res = await data.save();
-            //         console.log(res);
-            //         } catch(err){
-            //             console.log(err);
-            //         }
-            // }
-            // saveTheNote(newNote);
+class noteActions {
+
+        async saveNote(req, res){
             const title = req.body.title;
             const body = req.body.body;
-            res.send("zapisano: "+title+" "+body);
-        },
-        getAllNotes: (req, res) =>{
-            
-            res.send('..getAllNotes')
-        },
-        getNote: (req, res) =>{
 
-            res.send('..getNote');
-        },
-        updateNote: (req, res) =>{
+            let note;
+            try{
+                note = new Note({title, body});
+                await note.save();
+            } catch(err){
+               return res.status(422).json({message: err.message});
+            }
 
-            res.send('..update');
-        },
-        deleteNote: (req, res) =>{
+            res.status(201).json(note);
+            console.log("Note send. Title: "+title+" Body: "+body);
+        }
+
+
+        async getAllNotes(req, res){
+         const doc = await Note.find({});
+
+         res.status(200).json(doc);
+        }
+
+
+        async getNote(req, res){
             const id = req.params.id;
 
-            res.send('..delete ID: '+id);
-        },
-    
-};
+            const note = await Note.findOne({_id: id});
+
+            res.status(200).json(note);
+        }
+
+
+        async updateNote(req, res){
+            const id = req.params.id;
+            const title = req.body.title;
+            const body = req.body.body;
+
+            const note = await Note.findOne({_id: id});
+            note.title = title;
+            note.body = body;
+
+            await note.save();
+
+            res.status(201).json(note);
+        }
+
+
+        async deleteNote(req, res){
+            const id = req.params.id;
+            
+            await Note.deleteOne({_id: id});
+
+            res.sendStatus(204);
+        }
+}
+module.exports = new noteActions();
